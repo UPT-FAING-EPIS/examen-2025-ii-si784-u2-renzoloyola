@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Music Remote UI</title>
+  </head>
+  <body>
+    <h1>Music Remote (Simulated)</h1>
+    <button id="play">Play</button>
+    <button id="pause">Pause</button>
+    <button id="skip">Skip</button>
+    <p id="status">Idle</p>
+    <script>
+      document.getElementById('play').addEventListener('click', () => {
+        document.getElementById('status').textContent = 'Playing the song.';
+      });
+      document.getElementById('pause').addEventListener('click', () => {
+        document.getElementById('status').textContent = 'Pausing the song.';
+      });
+      document.getElementById('skip').addEventListener('click', () => {
+        document.getElementById('status').textContent = 'Skipping to the next song.';
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "music-ui",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:ui": "playwright test --project=chromium --project=firefox --reporter=list,html",
+    "install-browsers": "npx playwright install --with-deps"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.39.0"
+  }
+}
