@@ -1,0 +1,81 @@
+name: UI Tests - Búsqueda Tesis UPT
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 8 * * 1'
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Instalar dependencias
+      run: npm ci
+
+    - name: Instalar Playwright
+      run: npx playwright install --with-deps
+
+    - name: Crear directorio para screenshots
+      run: mkdir -p screenshots
+
+    - name: Ejecutar pruebas en ${{ matrix.browser }}
+      run: npx playwright test --project=${{ matrix.browser }} --reporter=html,line
+      env:
+        CI: true
+
+    - name: Subir reporte de pruebas
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-${{ matrix.browser }}
+        path: |
+          playwright-report/
+          test-results/
+          screenshots/
+        retention-days: 30
+
+    - name: Generar video de pruebas
+      if: always()
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        if [ -d "test-results" ]; then
+          find test-results -name "*.webm" -exec echo "Video encontrado: {}" \;
+        fi
+
+    - name: Subir videos de pruebas
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-videos-${{ matrix.browser }}
+        path: test-results/**/*.webm
+        retention-days: 30
+
+  report:
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Descargar y mostrar resumen
+        run: |
+          echo "Pruebas de UI completadas para búsqueda de tesis UPT"
+          echo "Navegadores probados: Chromium y Firefox"
+          echo "Revisa los artifacts para ver reportes y videos"

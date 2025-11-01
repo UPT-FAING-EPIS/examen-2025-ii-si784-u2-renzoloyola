@@ -1,0 +1,10 @@
+node_modules/
+.playwright/
+playwright-report/
+test-results/
+.vscode/
+.idea/
+.DS_Store
+npm-debug.log
+coverage/
+.env
