@@ -1,0 +1,50 @@
+name: CI - Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Restore and build
+        run: dotnet build --configuration Release
+
+      - name: Run unit tests (with coverage)
+        run: dotnet test tests/MusicControl.Tests/MusicControl.Tests.csproj --collect:"XPlat Code Coverage" --results-directory ./test-results
+
+      - name: Run SpecFlow BDD tests
+        run: dotnet test tests/MusicControl.Specs/MusicControl.Specs.csproj --logger "trx;LogFileName=specs.trx" --results-directory ./test-results
+
+      - name: Install Playwright deps
+        run: npm ci
+        working-directory: web
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+        working-directory: web
+
+      - name: Run Playwright UI tests (Chromium + Firefox) and record videos
+        run: npm run test:ui
+        working-directory: web
+
+      - name: Upload Playwright HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: web/playwright-report
